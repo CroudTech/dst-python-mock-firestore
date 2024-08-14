@@ -1,0 +1,6 @@
+REPO_PATH=$(git rev-parse --show-toplevel)
+if [[ $REPO_PATH != *"dst-repo-template"* ]]; then
+    (source config.dst && pipenv run flake8 $PYTHON_SRC --config $REPO_PATH/.flake8)
+    (source config.dst && pipenv run black $PYTHON_SRC --config $REPO_PATH/pyproject.toml --check)
+    (source config.dst && pipenv run sqlfluff lint $SQL_SRC --config $REPO_PATH/pyproject.toml)
+fi

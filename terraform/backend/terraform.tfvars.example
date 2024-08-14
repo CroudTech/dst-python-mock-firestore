@@ -1,0 +1,4 @@
+region      = "REGION_HERE"
+project_id  = "PROJECT_HERE"
+environment = "dev|prod"
+repo        = "CURRENT_REPO_HERE"

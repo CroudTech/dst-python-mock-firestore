@@ -1,0 +1,50 @@
+name: Nightly PR Merge
+
+on:
+  # Support for manual trigger as well
+  workflow_dispatch:
+  schedule:
+    - cron: "0 0 * * *" # Runs every day at midnight
+
+env:
+  TARGET_LABEL: "night-release"
+
+permissions:
+  pull-requests: write
+  contents: write
+  issues: write
+
+jobs:
+  merge_prs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@users.noreply.github.com"
+
+      # Note that github.repository is owner/repo already
+      - name: Get PRs with label
+        run: |
+          PR_LIST=$(gh pr list --state open --label ${{ env.TARGET_LABEL }} --repo ${{ github.repository }} --json number --json title)
+          echo "PRS='$PR_LIST'" >> $GITHUB_ENV
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Merge PRs
+        run: |
+          for pr in $(echo ${{ env.PRS }} | jq -r '.[] | @base64'); do
+            _jq() {
+              echo ${pr} | base64 --decode | jq -r ${1}
+            }
+            PR_NUMBER=$(_jq '.number')
+            PR_TITLE=$(_jq '.title')
+            gh pr merge $PR_NUMBER --repo ${{ github.repository }} --squash --delete-branch
+            echo "Rebased and Merged PR #$PR_NUMBER: $PR_TITLE"
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

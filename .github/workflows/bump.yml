@@ -1,0 +1,56 @@
+name: Version Bump
+
+on:
+  # Support for running the workflow directly from the GH Actions tab.
+  workflow_dispatch:
+
+  # # Support for schedule
+  # schedule:
+  #   # Twice a month on the 1st and 15th at 12:30
+  #   - cron: "30 12 1,15 * *"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - name: "Check out the code"
+        uses: actions/checkout@v3
+      - name: "Configure GitHub Actions robot"
+        run: |
+          git config --global user.name github-actions[bot]
+          git config --global user.email 41898282+github-actions[bot]@users.noreply.github.com
+      - name: "Get and store timestamp"
+        run: echo "NOW=$(date '+%Y%m%dT%H%M%S')" >> $GITHUB_ENV
+      - name: "Set and store branch name"
+        run: echo ${{ env.NOW }} && echo "BRANCH_NAME=version-bump-${{ env.NOW }}" >> $GITHUB_ENV
+      - name: "Create new labels"
+        run: gh label create 'version-bump' --description "Version bump for package" --color ED7B11 --force
+      - name: "Create new branch"
+        run: git checkout -b ${{ env.BRANCH_NAME }}
+      - name: "Create bumpfile if not present"
+        run: |
+          if [[ ! -f VERSION_BUMP.md ]]; then
+            echo "# VERSION BUMP TRACKING" >> VERSION_BUMP.md
+            echo "" >> VERSION_BUMP.md
+            echo "Version bumps will be tracked here, this file lists all version bumps triggered (and approved)." >> VERSION_BUMP.md
+            echo "" >> VERSION_BUMP.md
+          fi
+      - name: "Edit bumpfile"
+        run: |
+          echo "Bump triggered on $(date)" >> VERSION_BUMP.md
+      - name: "Add changes"
+        run: 'git add .'
+      - name: "Create new commit"
+        run: 'git commit --allow-empty -m "fix: version bump"'
+      - name: "Push new commit"
+        run: git push -u origin --all
+      - name: "Create PR"
+        run: "gh pr create -B main -H ${{env.BRANCH_NAME}} --title 'ci: version bump' --body 'Version bump triggered from a GitHub Action. Please approve this PR ASAP.' --label 'version-bump'"

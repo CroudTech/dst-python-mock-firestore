@@ -1,0 +1,3 @@
+export PIPENV_CUSTOM_VENV_NAME="dst-repo-template"
+export PYTHON_SRC="src"
+export SQL_SRC="src"

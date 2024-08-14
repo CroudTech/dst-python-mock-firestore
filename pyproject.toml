@@ -1,0 +1,50 @@
+[tool.black]
+line-length = 128
+target-version = ['py39']
+
+[tool.sqlfluff.core]
+templater = "dbt"
+dialect = "bigquery"
+sql_file_exts = ".sql,.sql.j2,.dml,.ddl"
+exclude_rules = "ambiguous.column_count,structure.column_order,LT12,ST07"
+max_line_length = 128
+ignore = "target/,dbt_packages/"
+runaway_limit = 10
+indent_unit = "space"
+
+[tool.sqlfluff.templater]
+unwrap_wrapped_queries = true
+
+[tool.sqlfluff.rules.capitalisation.keywords]
+capitalisation_policy = "upper"
+
+[tool.sqlfluff.indentation]
+tab_space_size = 4
+
+[tool.sqlfluff.layout.type.comma]
+spacing_before = "touch"
+line_position = "trailing"
+
+[tool.sqlfluff.templater.jinja]
+apply_dbt_builtins = true
+
+[tool.sqlfluff.rules.aliasing.table]
+aliasing = "explicit"
+
+[tool.sqlfluff.rules.aliasing.column]
+aliasing = "explicit"
+
+[tool.sqlfluff.rules.aliasing.expression]
+allow_scalar = false
+
+[tool.sqlfluff.rules.ambiguous.column_references]
+group_by_and_order_by_style = "explicit"
+
+[tool.sqlfluff.templater.dbt.context]
+# google_ads_source_data_gcp_project= "prj-iwg-prod-data-warehouse"
+# Add more variables here and remove the comments. See the syntax for the variables...
+
+[tool.sqlfluff.templater.dbt]
+project_dir = "."
+profiles_dir = "."
+profile = "unity_base_dbt_profile"  # Change the name of your profile.

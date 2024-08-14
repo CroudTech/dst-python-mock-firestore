@@ -1,0 +1,17 @@
+{
+  "name": "dst-repo-template",
+  "version": "1.0.0",
+  "description": "Repository template for DST.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CroudTech/dst-repo-template.git"
+  },
+  "author": "Gonzalo Hirsch",
+  "bugs": {
+    "url": "https://github.com/CroudTech/dst-repo-template/issues"
+  },
+  "homepage": "https://github.com/CroudTech/dst-repo-template#readme",
+  "scripts": {
+    "prepare": "husky"
+  }
+}

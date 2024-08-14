@@ -1,0 +1,36 @@
+name: Release (via Release Please) and Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+  # Support for running the workflow directly from the GH Actions tab.
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    # Use release-please to create a Release PR
+    steps:
+      # Check out so it can build
+      - name: Check out Code
+        uses: actions/checkout@v3
+
+      # Necessary setups
+
+      - name: "Release via Release Please"
+        uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: simple
+          package-name: dst-repo-template
+          pull-request-header: ':robot: CroudieBot has created a release *beep* *boop*'
+          versioning-strategy: 'default'
+
+      # Action after release

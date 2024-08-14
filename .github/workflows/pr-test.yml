@@ -1,0 +1,40 @@
+name: "PR Testing"
+
+run-name: "@${{ github.actor }} testing ${{ github.event.number }}"
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - synchronize
+    paths-ignore:
+      - '**/*.md'
+      - '.github/**'
+      - 'terraform/**'
+      - 'data/**'
+      - 'docs/**'
+      - 'example-outputs/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Prepare Python environment for testing.
+        uses: CroudTech/dst-shared-github-actions/python-setup-testing@v2.1.0
+        with:
+          python_version: "3.9"
+          dependencies_wd: "."
+      
+      - name: Lint Python code.
+        uses: CroudTech/dst-shared-github-actions/python-lint@v2.1.0
+        with:
+          dependencies_wd: "."
+          lint_wd: "."  # TODO: Set the directory where you should be linting.
+          config_wd: "."
+
+      - name: Lint SQL code.
+        uses: CroudTech/dst-shared-github-actions/sql-lint@v2.1.0
+        with:
+          dependencies_wd: "."
+          lint_wd: "."  # TODO: Set the directory where you should be linting.
+          config_wd: "."
