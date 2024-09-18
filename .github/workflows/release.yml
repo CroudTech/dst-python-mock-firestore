@@ -1,0 +1,42 @@
+name: Release (via Release Please) and Deploy
+
+run-name: "@${{ github.actor }} is releasing 🚀"
+
+on:
+  push:
+    branches: [ main ]
+
+  # Support for running the workflow directly from the GH Actions tab.
+  # We don't limit this one because it can only run on master code, so no need to worry
+  workflow_dispatch:
+
+env:
+  PACKAGE_NAME: "dst-python-mock-firestore"
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    # Gives permissions to create a PR
+    permissions:
+      contents: write
+      pull-requests: write
+
+    # Use release-please to create a Release PR
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: simple
+          package-name: ${{ env.PACKAGE_NAME }}
+          pull-request-header: ':robot: CroudieBot has created a release *beep* *boop*'
+      
+      - name: "Debug Post Release Action"
+        run: |
+          echo "Release Created: ${{ steps.release.outputs.release_created }}"
+          echo "Release Tag: v${{ steps.release.outputs.major || '' }}.${{ steps.release.outputs.minor || '' }}.${{ steps.release.outputs.patch || '' }}"
