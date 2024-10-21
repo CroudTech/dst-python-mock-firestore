@@ -1,7 +1,8 @@
-from typing import Iterable, Sequence
-from mockfirestore.collection import CollectionReference
+from typing import Iterable, Sequence, Optional
+from mockfirestore.collection import CollectionReference, CollectionGroupReference
 from mockfirestore.document import DocumentReference, DocumentSnapshot
 from mockfirestore.transaction import Transaction
+from mockfirestore.query import CollectionGroup
 
 
 class MockFirestore:
@@ -44,15 +45,34 @@ class MockFirestore:
                 self._data[name] = {}
             return CollectionReference(self._data, [name])
 
+    # Taken from https://github.com/ainbr/python-mock-firestore/blob/a02dd24e770cc1eafe21a862b055fe833e6f1f48/mockfirestore/client.py
+    def collection_group(self, collection_id: str) -> CollectionGroup:
+        if "/" in collection_id:
+            raise ValueError(
+                "Invalid collection_id "
+                + collection_id
+                + ". Collection IDs must not contain '/'."
+            )
+
+        _, keys = _get_collection_group_data(self._data, collection_id)
+
+        return CollectionGroup(CollectionGroupReference(self._data, keys))
+
     def collections(self) -> Sequence[CollectionReference]:
-        return [CollectionReference(self._data, [collection_name]) for collection_name in self._data]
+        return [
+            CollectionReference(self._data, [collection_name])
+            for collection_name in self._data
+        ]
 
     def reset(self):
         self._data = {}
 
-    def get_all(self, references: Iterable[DocumentReference],
-                field_paths=None,
-                transaction=None) -> Iterable[DocumentSnapshot]:
+    def get_all(
+        self,
+        references: Iterable[DocumentReference],
+        field_paths=None,
+        transaction=None,
+    ) -> Iterable[DocumentSnapshot]:
         for doc_ref in set(references):
             yield doc_ref.get()
 
@@ -60,3 +80,61 @@ class MockFirestore:
         return Transaction(self, **kwargs)
 
 
+# Taken from https://github.com/ainbr/python-mock-firestore/blob/a02dd24e770cc1eafe21a862b055fe833e6f1f48/mockfirestore/client.py
+def _get_collection_group_data(
+    data: dict, name: str, output: Optional[dict] = None, depth=0, path=[]
+) -> dict:
+    """
+    Recursively get the data for a collection group.
+
+    Args:
+        data: The root data or document data to search.
+        name: The name of the collection group.
+        output: The flat output dictionary.
+
+    Returns:
+        A flat dictionary containing all the data for the collection group.
+    """
+    output = output or {}
+    if depth % 2 == 0 and name in data:
+        new_output = {}
+        for k in data[name]:
+            v = data[name][k]
+            if len(path) == 0:
+                new_output[k] = v
+            else:
+                new_output["/".join(path) + "/" + name + "/" + k] = v
+        output.update(new_output)
+        return output, None
+    else:
+        for k in data:
+            documents_in_collection = data[k]
+            if isinstance(documents_in_collection, dict):
+                if len(path) == 0:
+                    new_parent_path = [k]
+                else:
+                    new_parent_path = path + [k]
+                ret, _ = _get_collection_group_data(
+                    documents_in_collection, name, output, depth + 1, new_parent_path
+                )
+                output.update(ret)
+
+    if depth == 0:
+        new_output = {}
+        keys = output.keys()
+        for k in output:
+            sub_path = k.split("/")
+            pointer = new_output
+            for sub in sub_path[:-1]:
+                if sub not in pointer:
+                    pointer[sub] = {}
+                pointer = pointer[sub]
+            pointer[sub_path[-1]] = output[k]
+        output = new_output
+
+        new_keys = []
+        for key in keys:
+            new_keys.append(key.split("/"))
+        return output, new_keys
+
+    return output, None

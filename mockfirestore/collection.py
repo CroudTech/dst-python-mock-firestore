@@ -106,3 +106,45 @@ class CollectionReference:
         for key in sorted(get_by_path(self._data, self._path)):
             doc_snapshot = self.document(key).get()
             yield doc_snapshot
+
+
+# Taken from https://github.com/ainbr/python-mock-firestore/blob/a02dd24e770cc1eafe21a862b055fe833e6f1f48/mockfirestore/collection.py
+class CollectionGroupReference(CollectionReference):
+    def recursive_reference(
+        self, path: List[str]
+    ) -> DocumentReference | CollectionReference:
+        if len(path) == 1:
+            return CollectionReference(self._data, path)
+        else:
+            if len(path) % 2 == 0:
+                return DocumentReference(
+                    self._data, path, parent=self.recursive_reference(path[:-1])
+                )
+            else:
+                return CollectionReference(
+                    self._data, path, parent=self.recursive_reference(path[:-1])
+                )
+
+    def document(
+        self, document_id: Optional[str] = None, path: List[str] = None
+    ) -> DocumentReference:
+        if path is None:
+            path = self._path
+        collection = get_by_path(self._data, path)
+        if document_id is None:
+            document_id = generate_random_string()
+        # new_path = self._path + [document_id]
+        ret = self.recursive_reference(path)
+        return ret
+
+    def get(self) -> Iterable[DocumentSnapshot]:
+        warnings.warn(
+            "Collection.get is deprecated, please use Collection.stream",
+            category=DeprecationWarning,
+        )
+        return self.stream()
+
+    def stream(self, transaction=None) -> Iterable[DocumentSnapshot]:
+        for path in self._path:
+            doc_snapshot = self.document(path[-1], path).get()
+            yield doc_snapshot
