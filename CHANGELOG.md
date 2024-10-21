@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.1...v1.1.2) (2024-10-21)
+
+
+### Bug Fixes
+
+* out of date `where` filters ([818f609](https://github.com/CroudTech/dst-python-mock-firestore/commit/818f609731346042b550ad722623d37747df5582))
+
 ## [1.1.1](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.0...v1.1.1) (2024-10-21)
 
 
