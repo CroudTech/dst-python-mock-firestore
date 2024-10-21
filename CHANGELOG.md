@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.0...v1.1.1) (2024-10-21)
+
+
+### Bug Fixes
+
+* unsupported op `|` in collections ([66e8c97](https://github.com/CroudTech/dst-python-mock-firestore/commit/66e8c97d67f2a70ae0c1dfb5a83912f591888fc6))
+
 ## [1.1.0](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.0.0...v1.1.0) (2024-10-21)
 
 
