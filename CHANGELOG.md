@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.0](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.0.0...v1.1.0) (2024-10-21)
+
+
+### Features
+
+* added support for `collection-group` queries ([927963e](https://github.com/CroudTech/dst-python-mock-firestore/commit/927963efde9aa95b9b6a4acadeaf72e15b95f63e))
+
 ## 1.0.0 (2024-09-18)
 
 
