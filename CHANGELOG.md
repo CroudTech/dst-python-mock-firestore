@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.2...v1.1.3) (2024-10-21)
+
+
+### Bug Fixes
+
+* missing `path` in `DocumentReference` ([3527b77](https://github.com/CroudTech/dst-python-mock-firestore/commit/3527b77a3fb6c0015ed1286094b27eef564dd5e6))
+
 ## [1.1.2](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.1...v1.1.2) (2024-10-21)
 
 
