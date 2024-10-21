@@ -112,7 +112,7 @@ class CollectionReference:
 class CollectionGroupReference(CollectionReference):
     def recursive_reference(
         self, path: List[str]
-    ) -> DocumentReference | CollectionReference:
+    ) -> Union[DocumentReference, CollectionReference]:
         if len(path) == 1:
             return CollectionReference(self._data, path)
         else:
