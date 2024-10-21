@@ -1,5 +1,6 @@
 import warnings
 from typing import Any, List, Optional, Iterable, Dict, Tuple, Sequence, Union
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 from mockfirestore import AlreadyExists
 from mockfirestore._helpers import (
@@ -54,7 +55,19 @@ class CollectionReference:
         timestamp = Timestamp.from_now()
         return timestamp, doc_ref
 
-    def where(self, field: str, op: str, value: Any) -> Query:
+    def where(
+        self,
+        field: Optional[str] = None,
+        op: Optional[str] = None,
+        value: Optional[Any] = None,
+        filter: Optional[FieldFilter] = None,
+    ) -> Query:
+        if filter is not None:
+            field, op, value = filter.field_path, filter.op_string, filter.value
+        if field is None or op is None or value is None:
+            raise ValueError(
+                "field, op, and value must be provided (or a FieldFilter instance)"
+            )
         query = Query(self, field_filters=[(field, op, value)])
         return query
 
@@ -62,7 +75,13 @@ class CollectionReference:
         query = Query(self, orders=[(key, direction)])
         return query
 
-    def limit(self, limit_amount: int) -> Query:
+    def limit(self, limit_amount: Optional[int]) -> Query:
+        if not isinstance(limit_amount, (int, type(None))):
+            raise TypeError(
+                f"TypeError: Cannot set google.protobuf.Int32Value.value to {limit_amount}:"
+                f" {limit_amount} has type {type(limit_amount)},"
+                f" but expected one of: ({int},) for field Int32Value.value"
+            )
         query = Query(self, limit=limit_amount)
         return query
 
