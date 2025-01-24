@@ -1,7 +1,7 @@
 import warnings
 from itertools import islice, tee
-from typing import Iterator, Any, Optional, List, Callable, Union
-from google.cloud.firestore_v1.base_query import FieldFilter
+from typing import Iterator, Any, Optional, Callable, Union
+from google.cloud.firestore_v1.base_query import FieldFilter, And, Or
 from mockfirestore.document import DocumentSnapshot
 from mockfirestore._helpers import T
 
@@ -21,7 +21,7 @@ class Query:
         self,
         parent: "CollectionReference",
         projection=None,
-        field_filters=(),
+        field_filter: Union[FieldFilter, And, Or, None] = None,
         orders=(),
         limit=None,
         offset=None,
@@ -31,7 +31,7 @@ class Query:
     ) -> None:
         self.parent = parent
         self.projection = projection
-        self._field_filters = []
+        self._field_filter = field_filter
         self.orders = list(orders)
         self._limit = limit
         self._offset = offset
@@ -39,19 +39,33 @@ class Query:
         self._end_at = end_at
         self.all_descendants = all_descendants
 
-        if field_filters:
-            for field_filter in field_filters:
-                self._add_field_filter(*field_filter)
+    def _query_filter(self, doc_snapshots, field_filter: Union[FieldFilter, And, Or, None]):
+        if field_filter is None:
+            return doc_snapshots
+
+        if isinstance(field_filter, FieldFilter):
+            compare = self._compare_func(field_filter.op_string)
+            return [
+                doc_snapshot
+                for doc_snapshot in doc_snapshots
+                if compare(doc_snapshot._get_by_field_path(field_filter.field_path), field_filter.value)
+            ]
+
+        if isinstance(field_filter, And):
+            for and_filter in field_filter.filters:
+                doc_snapshots = self._query_filter(doc_snapshots, and_filter)
+            return doc_snapshots
+
+        if isinstance(field_filter, Or):
+            # Collect results for each filter in the OR condition
+            or_results = set()
+            for or_filter in field_filter.filters:
+                or_results.update(self._query_filter(doc_snapshots, or_filter))
+            return [doc_snapshot for doc_snapshot in doc_snapshots if doc_snapshot in or_results]
 
     def stream(self, transaction=None) -> Iterator[DocumentSnapshot]:
         doc_snapshots = self.parent.stream()
-
-        for field, compare, value in self._field_filters:
-            doc_snapshots = [
-                doc_snapshot
-                for doc_snapshot in doc_snapshots
-                if compare(doc_snapshot._get_by_field_path(field), value)
-            ]
+        doc_snapshots = self._query_filter(doc_snapshots, self._field_filter)
 
         if self.orders:
             for key, direction in self.orders:
@@ -87,10 +101,6 @@ class Query:
         )
         return self.stream()
 
-    def _add_field_filter(self, field: str, op: str, value: Any):
-        compare = self._compare_func(op)
-        self._field_filters.append((field, compare, value))
-
     def where(
         self,
         field: Optional[str] = None,
@@ -98,13 +108,13 @@ class Query:
         value: Optional[Any] = None,
         filter: Optional[FieldFilter] = None,
     ) -> "Query":
-        if filter is not None:
-            field, op, value = filter.field_path, filter.op_string, filter.value
-        if field is None or op is None or value is None:
+        if filter is None and (field is None or op is None or value is None):
             raise ValueError(
                 "field, op, and value must be provided (or a FieldFilter instance)"
             )
-        self._add_field_filter(field, op, value)
+        if filter is None:
+            filter = FieldFilter(field, op, value)
+        self._field_filter = filter
         return self
 
     def order_by(self, key: str, direction: Optional[str] = "ASCENDING") -> "Query":

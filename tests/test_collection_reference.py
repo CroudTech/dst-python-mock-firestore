@@ -1,5 +1,7 @@
 from unittest import TestCase
 
+from google.cloud.firestore_v1.base_query import And, FieldFilter, Or
+
 from mockfirestore import MockFirestore, DocumentReference, DocumentSnapshot, AlreadyExists
 
 
@@ -80,6 +82,32 @@ class TestCollectionReference(TestCase):
 
         docs = list(fs.collection('foo').where('valid', '==', True).stream())
         self.assertEqual({'valid': True}, docs[0].to_dict())
+
+    def test_collection_whereEquals_And_Nested_Or(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'valid': True, 'name': 'A wonderful test'},
+            'second': {'valid': False, 'name': 'A test'},
+            'third': {'valid': True, 'name': 'A different test'},
+            'fourth': {'valid': False, 'name': 'Another test'},
+            'fifth': {'valid': True, 'name': 'A wow test'},
+        }}
+        filter = And((
+            FieldFilter('valid', '==', True),
+            Or((
+                FieldFilter('name', '==', 'A wonderful test'),
+                FieldFilter('name', '==', 'A wow test'),
+            ))
+        ))
+        docs = list(fs.collection('foo').where(filter=filter).stream())
+        self.assertEqual(len(docs), 2)
+        names = set()
+        for doc in docs:
+            doc_dict = doc.to_dict()
+            self.assertTrue(doc_dict['valid'])
+            names.add(doc_dict['name'])
+        self.assertIn('A wonderful test', names)
+        self.assertIn('A wow test', names)
 
     def test_collection_whereNotEquals(self):
         fs = MockFirestore()
