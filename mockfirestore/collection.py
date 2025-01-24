@@ -1,6 +1,6 @@
 import warnings
 from typing import Any, List, Optional, Iterable, Dict, Tuple, Sequence, Union
-from google.cloud.firestore_v1.base_query import FieldFilter
+from google.cloud.firestore_v1.base_query import FieldFilter, And, Or
 
 from mockfirestore import AlreadyExists
 from mockfirestore._helpers import (
@@ -60,15 +60,15 @@ class CollectionReference:
         field: Optional[str] = None,
         op: Optional[str] = None,
         value: Optional[Any] = None,
-        filter: Optional[FieldFilter] = None,
+        filter: Union[FieldFilter, And, Or, None] = None,
     ) -> Query:
-        if filter is not None:
-            field, op, value = filter.field_path, filter.op_string, filter.value
-        if field is None or op is None or value is None:
+        if filter is None and (field is None or op is None or value is None):
             raise ValueError(
                 "field, op, and value must be provided (or a FieldFilter instance)"
             )
-        query = Query(self, field_filters=[(field, op, value)])
+        if filter is None:
+            filter = FieldFilter(field, op, value)
+        query = Query(self, field_filter=filter)
         return query
 
     def order_by(self, key: str, direction: Optional[str] = None) -> Query:
