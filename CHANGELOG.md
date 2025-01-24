@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.3...v1.2.0) (2025-01-24)
+
+
+### Features
+
+* Support Or and nested queries ([#13](https://github.com/CroudTech/dst-python-mock-firestore/issues/13)) ([d26e457](https://github.com/CroudTech/dst-python-mock-firestore/commit/d26e457cc8ce5b1c945953a560b30f6bf396f422))
+
 ## [1.1.3](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.2...v1.1.3) (2024-10-21)
 
 
