@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.1](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.2.0...v1.2.1) (2025-05-30)
+
+
+### Bug Fixes
+
+* Reverse order processing in queries and add test for multiple orderBy fields ([#15](https://github.com/CroudTech/dst-python-mock-firestore/issues/15)) ([baf1319](https://github.com/CroudTech/dst-python-mock-firestore/commit/baf131997fff2cbdc39669d014a9902b9b0bb824))
+
 ## [1.2.0](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.1.3...v1.2.0) (2025-01-24)
 
 
