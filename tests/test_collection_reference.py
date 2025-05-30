@@ -245,6 +245,28 @@ class TestCollectionReference(TestCase):
         self.assertEqual({'order': 2}, docs[1].to_dict())
         self.assertEqual({'order': 1}, docs[2].to_dict())
 
+    def test_collection_orderBy_multiple(self):
+        fs = MockFirestore()
+        doc1 = {'order': 2, 'another_order': 100}
+        doc2 = {'order': 1, 'another_order': 200}
+        doc3 = {'order': 1, 'another_order': 1}
+        doc4 = {'order': 3, 'another_order': 3}
+        doc5 = {'order': 3, 'another_order': 2}
+        fs._data = {'foo': {
+            'first': doc1,
+            'second': doc2,
+            'third': doc3,
+            'fourth': doc4,
+            'fifth': doc5
+        }}
+
+        docs = list(fs.collection('foo').order_by('order').order_by('another_order', direction="DESCENDING").stream())
+        self.assertEqual(doc2, docs[0].to_dict())
+        self.assertEqual(doc3, docs[1].to_dict())
+        self.assertEqual(doc1, docs[2].to_dict())
+        self.assertEqual(doc4, docs[3].to_dict())
+        self.assertEqual(doc5, docs[4].to_dict())
+
     def test_collection_limit(self):
         fs = MockFirestore()
         fs._data = {'foo': {

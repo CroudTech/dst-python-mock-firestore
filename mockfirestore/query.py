@@ -68,7 +68,7 @@ class Query:
         doc_snapshots = self._query_filter(doc_snapshots, self._field_filter)
 
         if self.orders:
-            for key, direction in self.orders:
+            for key, direction in reversed(self.orders):  # Process least significant first
                 doc_snapshots = sorted(
                     doc_snapshots,
                     key=lambda doc: doc.to_dict()[key],
