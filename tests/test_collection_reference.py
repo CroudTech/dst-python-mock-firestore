@@ -547,3 +547,31 @@ class TestCollectionReference(TestCase):
         }}
         doc = fs.collection('foo').document(document_id='first').get()
         self.assertEqual({'id': 1}, doc.to_dict())
+        
+    def test_collection_orderBy_with_nested_field(self):
+        fs = MockFirestore()
+        fs._data = {'foo': {
+            'first': {'user': {'name': 'Charlie', 'age': 30}},
+            'second': {'user': {'name': 'Alice', 'age': 25}},
+            'third': {'user': {'name': 'Bob', 'age': 35}}
+        }}
+        # Test ordering by nested field using dot notation
+        docs = list(fs.collection('foo').order_by('user.name').stream())
+        self.assertEqual(3, len(docs))
+        self.assertEqual('Alice', docs[0].get('user.name'))
+        self.assertEqual('Bob', docs[1].get('user.name'))
+        self.assertEqual('Charlie', docs[2].get('user.name'))
+        
+        # Test ordering by another nested field
+        docs = list(fs.collection('foo').order_by('user.age').stream())
+        self.assertEqual(3, len(docs))
+        self.assertEqual(25, docs[0].get('user.age'))
+        self.assertEqual(30, docs[1].get('user.age'))
+        self.assertEqual(35, docs[2].get('user.age'))
+        
+        # Test ordering in descending order
+        docs = list(fs.collection('foo').order_by('user.age', direction='DESCENDING').stream())
+        self.assertEqual(3, len(docs))
+        self.assertEqual(35, docs[0].get('user.age'))
+        self.assertEqual(30, docs[1].get('user.age'))
+        self.assertEqual(25, docs[2].get('user.age'))

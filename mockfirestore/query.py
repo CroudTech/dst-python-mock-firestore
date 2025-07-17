@@ -71,7 +71,7 @@ class Query:
             for key, direction in reversed(self.orders):  # Process least significant first
                 doc_snapshots = sorted(
                     doc_snapshots,
-                    key=lambda doc: doc.to_dict()[key],
+                    key=lambda doc: doc.get(key),
                     reverse=direction == "DESCENDING",
                 )
         if self._start_at:
