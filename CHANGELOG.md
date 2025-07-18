@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.2.1...v1.2.2) (2025-07-17)
+
+
+### Bug Fixes
+
+* PT-731 `Allow chained order by` ([#17](https://github.com/CroudTech/dst-python-mock-firestore/issues/17)) ([55865f6](https://github.com/CroudTech/dst-python-mock-firestore/commit/55865f6f18c8b6e22dcf0be70e2fe698c07cd3b3))
+
 ## [1.2.1](https://github.com/CroudTech/dst-python-mock-firestore/compare/v1.2.0...v1.2.1) (2025-05-30)
 
 
