@@ -6,7 +6,7 @@ To install:
 
 `pip install mock-firestore`
 
-Python 3.8+ is supported.
+Python 3.9+ is supported.
 
 ## Usage
 
